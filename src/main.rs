@@ -1,4 +1,5 @@
 use blockchainlib::{current_timestamp, Block, Hashable};
+
 fn main() {
     let mut block = Block::new(
         13,
@@ -6,6 +7,7 @@ fn main() {
         vec![0; 32],
         0,
         "Genesis block".to_owned(),
+        0,
     );
     println!("{:?}", &block);
 
