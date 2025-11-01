@@ -14,7 +14,7 @@ pub struct Block {
     pub prev_hash_block: BlockHash,
     pub nonce: u64,
     pub payload: String,
-    difficulty: u128,
+    pub difficulty: u128,
 }
 
 impl Debug for Block {
