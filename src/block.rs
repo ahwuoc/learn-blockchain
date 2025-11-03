@@ -4,29 +4,29 @@ use crate::difficulty_bytes_as_u128;
 use crate::u128_bytes;
 use crate::u32_bytes;
 use crate::u64_bytes;
-use crate::BlockHash;
+use crate::Hash;
 use crate::Hashable;
+use crate::Transaction;
 
 pub struct Block {
     pub index: u32,
     pub timestamp: u128,
-    pub hash: BlockHash,
-    pub prev_hash_block: BlockHash,
+    pub hash: Hash,
+    pub prev_hash_block: Hash,
     pub nonce: u64,
-    pub payload: String,
     pub difficulty: u128,
+    pub transactions: Vec<Transaction>,
 }
 
 impl Debug for Block {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
-            "Block [{}]: {} at: {} with : {} nonce: {}",
+            "Block [{}]: {} at: {} nonce: {}",
             &self.index,
             &hex::encode(&self.hash),
             &self.timestamp,
-            &self.payload,
-            &self.nonce
+            &self.nonce,
         )
     }
 }
@@ -35,19 +35,18 @@ impl Block {
     pub fn new(
         index: u32,
         timestamp: u128,
-        prev_hash_block: BlockHash,
-        nonce: u64,
-        payload: String,
+        prev_hash_block: Hash,
         difficulty: u128,
+        transaction: Vec<Transaction>,
     ) -> Self {
         Self {
             index,
             timestamp,
             hash: vec![0; 32],
             prev_hash_block,
-            nonce,
-            payload,
+            nonce: 0,
             difficulty,
+            transactions: transaction,
         }
     }
     pub fn mine(&mut self) {
@@ -69,12 +68,17 @@ impl Hashable for Block {
         bytes.extend(&u128_bytes(&self.timestamp));
         bytes.extend(&self.prev_hash_block);
         bytes.extend(&u64_bytes(&self.nonce));
-        bytes.extend(self.payload.as_bytes());
         bytes.extend(&u128_bytes(&self.difficulty));
+        bytes.extend(
+            self.transactions
+                .iter()
+                .flat_map(|transaction| transaction.bytes())
+                .collect::<Vec<u8>>(),
+        );
         return bytes;
     }
 }
 
-pub fn check_difficulty(hash: &BlockHash, diffculty: u128) -> bool {
+pub fn check_difficulty(hash: &Hash, diffculty: u128) -> bool {
     return diffculty > difficulty_bytes_as_u128(&hash);
 }
